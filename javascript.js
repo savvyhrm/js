@@ -1,27 +1,40 @@
 (function() {
+    const loadedScripts = new Set();
 
-    // Create script element
-    var loaderScript = document.createElement("script");
-    loaderScript.type = "text/javascript";
+    // Custom condition function - sirf ye domain scripts track karenge
+    function shouldTrackScript(src) {
+        return src.includes("savvyhrm.github.io") || src.includes("cdn.jsdelivr.net");
+    }
 
-    // JS code as string
-    loaderScript.text = `
-        (function() {
-            const originalAddEventListener = document.addEventListener;
-            document.addEventListener = function(type, listener, options) {
-                if (type === "DOMContentLoaded") {
-                    const fnStr = listener.toString();
-                    if (fnStr.includes("savvyAll") || fnStr.includes("savvy") || fnStr.includes("sAll")) {
-                        console.log("Blocked a savvy loader listener");
-                        return;
+    // MutationObserver se naye script tags track karo
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.tagName === 'SCRIPT') {
+                    const src = node.src || node.getAttribute('src');
+                    if (!src) return;
+
+                    if (shouldTrackScript(src)) {
+                        if (loadedScripts.has(src)) {
+                            console.log("Duplicate script blocked:", src);
+                            node.remove();
+                        } else {
+                            loadedScripts.add(src);
+                        }
                     }
                 }
-                return originalAddEventListener.call(this, type, listener, options);
-            };
-        })();
-    `;
+            });
+        });
+    });
 
-    // Append to head or body
-    (document.head || document.body).appendChild(loaderScript);
+    // Initial page ke scripts bhi track karlo jinke src match kare
+    document.querySelectorAll('script[src]').forEach(script => {
+        const src = script.src;
+        if (shouldTrackScript(src)) {
+            loadedScripts.add(src);
+        }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
 
 })();
